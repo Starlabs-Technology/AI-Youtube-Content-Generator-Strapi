@@ -351,10 +351,10 @@ Each job is stored as a `plugin::ai-youtube-article.ai-job` content type:
 
 ---
 
-## 👨‍💻 Author
+## 🏢 Author
 
-**Ashwin Kumar**  
-📧 girachashwin048@gmail.com
+**Star Labs Technology**  
+🌐 [starlabs.net.au](https://starlabs.net.au)
 
 ---
 
@@ -362,6 +362,8 @@ Each job is stored as a `plugin::ai-youtube-article.ai-job` content type:
 
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
+© Star Labs Technology — [starlabs.net.au](https://starlabs.net.au)
+
 ---
 
-> Built with ❤️ for content teams who want to turn videos into articles without leaving Strapi.
+> Built with ❤️ by [Star Labs Technology](https://starlabs.net.au) for content teams who want to turn videos into articles without leaving Strapi.
