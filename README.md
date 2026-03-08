@@ -1,4 +1,4 @@
-# AI YouTube Article — Strapi v5 Plugin
+# AI YouTube Content Generator — Strapi v5 Plugin
 
 > Turn any YouTube video into a fully-written, publish-ready article in seconds — right from the Strapi admin panel.
 
