@@ -1,0 +1,67 @@
+const schema = {
+  "kind": "collectionType",
+  "collectionName": "ai_jobs",
+  "info": {
+    "singularName": "ai-job",
+    "pluralName": "ai-jobs",
+    "displayName": "AI Job",
+    "description": "Tracks YouTube transcription and article generation jobs"
+  },
+  "options": {
+    "draftAndPublish": false,
+    "comment": ""
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "youtubeUrl": {
+      "type": "string",
+      "required": true,
+      "maxLength": 500
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending", "processing", "completed", "failed"],
+      "default": "pending",
+      "required": true
+    },
+    "progress": {
+      "type": "integer",
+      "min": 0,
+      "max": 100,
+      "default": 0
+    },
+    "pythonJobId": {
+      "type": "string",
+      "unique": true
+    },
+    "articleTitle": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "articleContent": {
+      "type": "text"
+    },
+    "articleSummary": {
+      "type": "text"
+    },
+    "errorMessage": {
+      "type": "text"
+    },
+    "errorDetails": {
+      "type": "json"
+    },
+    "createdArticle": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::article.article"
+    },
+    "metadata": {
+      "type": "json"
+    },
+    "completedAt": {
+      "type": "datetime"
+    }
+  }
+};
+
+export default { schema };

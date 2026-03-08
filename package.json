@@ -1,0 +1,62 @@
+{
+  "name": "ai-youtube-article",
+  "version": "1.0.0",
+  "description": "AI-powered YouTube video to article converter",
+  "strapi": {
+    "name": "ai-youtube-article",
+    "displayName": "AI YouTube Article",
+    "description": "Convert YouTube videos to articles using AI",
+    "kind": "plugin",
+    "required": false
+  },
+  "exports": {
+    "./strapi-admin": {
+      "types": "./strapi-admin.d.ts",
+      "source": "./admin/src/index.tsx",
+      "import": "./strapi-admin.js",
+      "require": "./strapi-admin.js",
+      "default": "./strapi-admin.js"
+    },
+    "./strapi-server": {
+      "types": "./strapi-server.d.ts",
+      "source": "./strapi-server.ts",
+      "import": "./strapi-server.js",
+      "require": "./strapi-server.js",
+      "default": "./strapi-server.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@strapi/design-system": "2.0.1",
+    "@strapi/icons": "2.0.1",
+    "axios": "^1.6.0",
+    "react-query": "^3.39.3"
+  },
+  "peerDependencies": {
+    "@strapi/strapi": "^5.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
+  },
+  "author": {
+    "name": "Ashwin Kumar",
+    "email": "girachashwin048@gmail.com"
+  },
+  "license": "MIT",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.28.5",
+    "@babel/preset-react": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "@types/jest": "^30.0.0",
+    "babel-jest": "^30.2.0",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
+    "jsdom": "^27.4.0"
+  }
+}
