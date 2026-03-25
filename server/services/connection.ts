@@ -17,9 +17,14 @@ export default ({ strapi }: { strapi: any }) => ({
 
     const results = { apify: apifyResult, gemini: geminiResult };
 
-    // If both failed, throw an error
-    if (results.apify.status === 'error' && results.gemini.status === 'error') {
-      throw new Error(`Apify: ${results.apify.message} | Gemini: ${results.gemini.message}`);
+    const failures: string[] = [];
+    if (results.apify.status === 'error') failures.push(`Apify: ${results.apify.message}`);
+    if (results.gemini.status === 'error') failures.push(`Gemini: ${results.gemini.message}`);
+
+    if (failures.length) {
+      const err: any = new Error(failures.join(' | '));
+      err.services = results;
+      throw err;
     }
 
     return results;

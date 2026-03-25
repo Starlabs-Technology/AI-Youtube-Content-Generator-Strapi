@@ -151,7 +151,7 @@ const HomePage: React.FC = () => {
   return (
     <>
       <PluginHeader
-        title="AI YouTube Article Generator"
+        title="AI Youtube Content Generator"
         subtitle="Generate articles from YouTube videos using AI-powered transcription"
         primaryAction={
           <Button
@@ -167,32 +167,83 @@ const HomePage: React.FC = () => {
         <Box padding={8}>
           {/* Stats Bar */}
           <Box marginBottom={6}>
-            <Box background="neutral0" hasRadius shadow="tableShadow" padding={6}>
-              <Flex gap={8}>
-                <Box>
-                  <Typography variant="pi" textColor="neutral600">Total Jobs</Typography>
-                  <Typography variant="alpha" fontWeight="bold">{totalJobs}</Typography>
-                </Box>
-                <Box>
-                  <Typography variant="pi" textColor="primary600">Processing</Typography>
-                  <Typography variant="alpha" fontWeight="bold" textColor="primary600">
-                    {pendingCount + processingCount}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="pi" textColor="success600">Completed</Typography>
-                  <Typography variant="alpha" fontWeight="bold" textColor="success600">
-                    {completedCount}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="pi" textColor="danger600">Failed</Typography>
-                  <Typography variant="alpha" fontWeight="bold" textColor="danger600">
-                    {failedCount}
-                  </Typography>
-                </Box>
-              </Flex>
-            </Box>
+            <Flex gap={4} wrap="wrap">
+              {/* Total Jobs */}
+              <Box
+                flex="1"
+                style={{ minWidth: 160 }}
+                background="neutral0"
+                hasRadius
+                shadow="tableShadow"
+                padding={5}
+              >
+                <Flex direction="column" gap={2}>
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Typography variant="pi" textColor="neutral500" style={{ textTransform: 'uppercase', letterSpacing: '0.6px', fontWeight: 600 }}>Total Jobs</Typography>
+                    <Box style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(139,130,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: 14, lineHeight: 1 }}>📋</span></Box>
+                  </Flex>
+                  <Typography variant="alpha" fontWeight="bold" style={{ fontSize: '2rem', lineHeight: 1 }}>{totalJobs}</Typography>
+                  <Box style={{ height: 3, borderRadius: 2, background: '#8b82ff', marginTop: 4 }} />
+                </Flex>
+              </Box>
+
+              {/* Processing */}
+              <Box
+                flex="1"
+                style={{ minWidth: 160 }}
+                background="neutral0"
+                hasRadius
+                shadow="tableShadow"
+                padding={5}
+              >
+                <Flex direction="column" gap={2}>
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Typography variant="pi" style={{ textTransform: 'uppercase', letterSpacing: '0.6px', fontWeight: 600, color: '#4945ff' }}>Processing</Typography>
+                    <Box style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(73,69,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: 14, lineHeight: 1 }}>⚙️</span></Box>
+                  </Flex>
+                  <Typography variant="alpha" fontWeight="bold" style={{ fontSize: '2rem', lineHeight: 1, color: '#4945ff' }}>{pendingCount + processingCount}</Typography>
+                  <Box style={{ height: 3, borderRadius: 2, background: '#4945ff', marginTop: 4 }} />
+                </Flex>
+              </Box>
+
+              {/* Completed */}
+              <Box
+                flex="1"
+                style={{ minWidth: 160 }}
+                background="neutral0"
+                hasRadius
+                shadow="tableShadow"
+                padding={5}
+              >
+                <Flex direction="column" gap={2}>
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Typography variant="pi" style={{ textTransform: 'uppercase', letterSpacing: '0.6px', fontWeight: 600, color: '#328048' }}>Completed</Typography>
+                    <Box style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(50,128,72,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: 14, lineHeight: 1 }}>✅</span></Box>
+                  </Flex>
+                  <Typography variant="alpha" fontWeight="bold" style={{ fontSize: '2rem', lineHeight: 1, color: '#328048' }}>{completedCount}</Typography>
+                  <Box style={{ height: 3, borderRadius: 2, background: '#328048', marginTop: 4 }} />
+                </Flex>
+              </Box>
+
+              {/* Failed */}
+              <Box
+                flex="1"
+                style={{ minWidth: 160 }}
+                background="neutral0"
+                hasRadius
+                shadow="tableShadow"
+                padding={5}
+              >
+                <Flex direction="column" gap={2}>
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Typography variant="pi" style={{ textTransform: 'uppercase', letterSpacing: '0.6px', fontWeight: 600, color: '#d02b20' }}>Failed</Typography>
+                    <Box style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(208,43,32,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: 14, lineHeight: 1 }}>❌</span></Box>
+                  </Flex>
+                  <Typography variant="alpha" fontWeight="bold" style={{ fontSize: '2rem', lineHeight: 1, color: '#d02b20' }}>{failedCount}</Typography>
+                  <Box style={{ height: 3, borderRadius: 2, background: '#d02b20', marginTop: 4 }} />
+                </Flex>
+              </Box>
+            </Flex>
           </Box>
 
           <Box marginBottom={6}>
@@ -203,7 +254,7 @@ const HomePage: React.FC = () => {
               padding={6}
             >
               <Flex direction="column" alignItems="stretch" gap={6}>
-                <Typography variant="alpha" fontWeight="bold">
+                <Typography variant="beta" fontWeight="bold" style={{ fontSize: '1.5rem' }}>
                   Create New Job
                 </Typography>
                 <Divider />

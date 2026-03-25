@@ -29,14 +29,15 @@ export default ({ strapi }) => ({
 
       ctx.body = {
         success: true,
-        message: 'Connection successful',
-        data: result,
+        message: 'Settings saved — all services connected successfully',
+        services: result,
       };
-    } catch (error) {
+    } catch (error: any) {
       ctx.status = 400;
       ctx.body = {
         success: false,
         message: error.message || 'Connection failed',
+        services: error.services || null,
       };
     }
   },

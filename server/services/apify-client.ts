@@ -70,7 +70,7 @@ export class ApifyClient {
 
     if (!response.ok) {
       const text = await response.text().catch(() => '');
-      throw new Error(`Apify: failed to start actor run (${response.status}): ${text}`);
+      throw new Error(this.translateHttpError(response.status, 'start actor run', text));
     }
 
     const json = (await response.json()) as ApifyRunResponse;
@@ -92,7 +92,8 @@ export class ApifyClient {
       const response = await fetch(url);
 
       if (!response.ok) {
-        throw new Error(`Apify: failed to fetch run status (${response.status})`);
+        const text = await response.text().catch(() => '');
+        throw new Error(this.translateHttpError(response.status, 'check run status', text));
       }
 
       const json = (await response.json()) as ApifyRunResponse;
@@ -102,15 +103,23 @@ export class ApifyClient {
         return json.data;
       }
 
-      if (status === 'FAILED' || status === 'ABORTED' || status === 'TIMED-OUT') {
-        throw new Error(`Apify: actor run ${status}`);
+      if (status === 'FAILED') {
+        throw new Error('Apify: transcript extraction failed — the video may be private, age-restricted, or have no captions');
+      }
+
+      if (status === 'ABORTED') {
+        throw new Error('Apify: transcript extraction was aborted');
+      }
+
+      if (status === 'TIMED-OUT') {
+        throw new Error('Apify: transcript extraction timed out — the video may be very long, or Apify may be overloaded');
       }
 
       // Still RUNNING / READY — wait and retry
       await this.sleep(this.config.pollInterval ?? 5000);
     }
 
-    throw new Error('Apify: actor run timed out waiting for completion');
+    throw new Error('Apify: timed out waiting for transcript extraction — the video may be very long or Apify is currently overloaded');
   }
 
   /** Retrieve transcript items from the run's default dataset */
@@ -119,7 +128,8 @@ export class ApifyClient {
     const response = await fetch(url);
 
     if (!response.ok) {
-      throw new Error(`Apify: failed to fetch dataset items (${response.status})`);
+      const text = await response.text().catch(() => '');
+      throw new Error(this.translateHttpError(response.status, 'fetch transcript results', text));
     }
 
     const items = (await response.json()) as TranscriptResult[];
@@ -184,6 +194,16 @@ export class ApifyClient {
     } catch (err: any) {
       return { status: 'error', message: err?.message || 'Apify unreachable' };
     }
+  }
+
+  private translateHttpError(status: number, context: string, body: string): string {
+    if (status === 401) return 'Apify: Invalid API token — verify your Apify API token in Settings';
+    if (status === 403) return 'Apify: Access denied — ensure your account has access to this actor';
+    if (status === 404) return 'Apify: Actor not found — check your Actor ID in Settings';
+    if (status === 429) return 'Apify: Rate limit exceeded — too many requests, please wait and retry';
+    if (status >= 500) return `Apify: Service error (${status}) — Apify may be temporarily unavailable`;
+    const detail = body ? `: ${body.substring(0, 200)}` : '';
+    return `Apify: ${context} failed (${status})${detail}`;
   }
 
   private sleep(ms: number) {

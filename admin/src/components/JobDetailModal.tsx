@@ -7,8 +7,9 @@ import {
   Typography,
   Alert,
   Link,
+  Divider,
 } from '@strapi/design-system';
-import { useJob, useCreateArticle, useRefreshJob } from '../hooks/useJobs';
+import { useJob, useCreateArticle, useRefreshJob, useRetryJob } from '../hooks/useJobs';
 
 import { useNotification } from '@strapi/strapi/admin';
 import { useQueryClient } from 'react-query';
@@ -27,6 +28,7 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({ jobId, onClose }
   const { toggleNotification } = useNotification();
   const queryClient = useQueryClient();
   const refreshJob = useRefreshJob();
+  const retryJob = useRetryJob();
 
   // Fallback: try to read job from cache if the detailed query hasn't resolved yet
   const cachedJob = React.useMemo(() => {
@@ -117,9 +119,6 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({ jobId, onClose }
     console.debug('[JobDetailModal] job change', { jobId, job, isLoading, error, cachedJob, mergedJob, isPollingArticle });
   }, [jobId, job, isLoading, error, cachedJob, mergedJob, isPollingArticle]);
 
-  // UI state: summary collapse
-  const [summaryOpen, setSummaryOpen] = React.useState(true);
-
   // Copy article to clipboard
   const handleCopyArticle = async () => {
     const text = mergedJob?.articleContent ?? mergedJob?.body ?? '';
@@ -153,10 +152,7 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({ jobId, onClose }
   // Reset modal-local UI state when modal closes/opens
   React.useEffect(() => {
     if (!jobId) {
-      setSummaryOpen(true);
       setIsPollingArticle(false);
-    } else {
-      setSummaryOpen(true);
     }
   }, [jobId]);
 
@@ -218,58 +214,75 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({ jobId, onClose }
             {mergedJob && (
               <Box padding={4}>
 
+                {/* Error details when job failed */}
+                {mergedJob.status === 'failed' && (
+                  <Box marginBottom={4}>
+                    <Alert variant="danger" title="Job Failed" closeLabel="Close">
+                      {mergedJob.errorMessage || 'An unknown error occurred during processing.'}
+                    </Alert>
+                  </Box>
+                )}
+
+                {/* Progress indicator for pending/processing jobs */}
+                {(mergedJob.status === 'pending' || mergedJob.status === 'processing') && (
+                  <Box marginBottom={4}>
+                    <Alert variant="info" title="Processing in progress" closeLabel="Close">
+                      {mergedJob.status === 'pending'
+                        ? 'Job is queued and will start shortly...'
+                        : (mergedJob.progress ?? 0) < 15
+                          ? 'Starting transcript extraction from YouTube...'
+                          : (mergedJob.progress ?? 0) < 45
+                            ? 'Extracting video transcript via Apify...'
+                            : (mergedJob.progress ?? 0) < 55
+                              ? 'Transcript ready — generating article with Gemini AI...'
+                              : 'Generating article with Gemini AI...'}
+                      {(mergedJob.progress ?? 0) > 0 && (
+                        <span style={{ display: 'block', marginTop: 4, fontSize: 12, color: '#888' }}>{mergedJob.progress}% complete</span>
+                      )}
+                    </Alert>
+                  </Box>
+                )}
+
                 {/* Completed jobs that have no article content: show polling/info while we're still attempting fetches, show error only after polling exhausted */}
                 {mergedJob.status === 'completed' && !(mergedJob.articleTitle || mergedJob.articleContent || mergedJob.articleSummary) && (
                   <Box paddingTop={3}>
                     {isPollingArticle ? (
                       <Alert variant="info" title="Waiting for article content" closeLabel="Close">The job is completed — attempting to fetch article content from the transcriber. We'll keep checking for updates.</Alert>
                     ) : (
-                      <Alert variant="danger" title="Completed job missing article content" closeLabel="Close">The backend returned a completed job without article content after several attempts; please investigate the transcriber or Python callback.</Alert>
+                      <Alert variant="danger" title="Article content unavailable" closeLabel="Close">This job completed but no article content was received. This may be a temporary issue — try refreshing the page or retrying the job.</Alert>
                     )}
                   </Box>
                 )}
 
-                {/* Summary card */}
+                {/* Article card: summary at top, then article body */}
                 <Box hasRadius shadow="filterShadow" background="neutral0" padding={4} style={{ marginTop: 12 }}>
                   <Flex justifyContent="space-between" alignItems="center">
-                    <Typography variant="pi" fontWeight="semiBold">Summary</Typography>
-                    <Button variant="tertiary" onClick={() => setSummaryOpen((s) => !s)}>{summaryOpen ? 'Collapse' : 'Expand'}</Button>
+                    <Typography variant="pi" fontWeight="semiBold">Article</Typography>
+                    <Button onClick={handleCopyArticle} variant="secondary">Copy Article</Button>
                   </Flex>
 
-                  {summaryOpen && (
-                    <Box paddingTop={3}>
-                      {/* Render bullets if summary contains line breaks or bullets else show paragraph */}
-                      {mergedJob.articleSummary && mergedJob.articleSummary.includes('\n') ? (
-                        <ul>
-                          {mergedJob.articleSummary.split('\n').map((line: string, i: number) => (
-                            <li key={i} style={{ marginBottom: 6 }}>{line.trim()}</li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <Typography>{mergedJob.articleSummary ?? 'No summary available.'}</Typography>
-                      )}
-                    </Box>
-                  )}
-                </Box>
-
-                <Box style={{ marginTop: 16 }}>
-                  <Box paddingTop={4}>
-                    <Box style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Box>
-                        <Typography variant="pi" fontWeight="semiBold">Article</Typography>
+                  {mergedJob.articleSummary && (
+                    <>
+                      <Box paddingTop={3} paddingBottom={3}>
+                        <Box background="neutral100" padding={4} hasRadius>
+                          <Typography variant="pi" fontWeight="semiBold" textColor="neutral600" style={{ textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: 8 }}>
+                            Summary
+                          </Typography>
+                          <Typography variant="omega" textColor="neutral700" style={{ lineHeight: '1.6' }}>
+                            {mergedJob.articleSummary}
+                          </Typography>
+                        </Box>
                       </Box>
-                      <Flex gap={2}>
-                        <Button onClick={handleCopyArticle} variant="secondary">Copy Article</Button>
-                      </Flex>
-                    </Box>
+                      <Divider />
+                    </>
+                  )}
 
-                    <Box id="article-body" paddingTop={3} style={{ lineHeight: 1.7, paddingBottom: 24 }}>
-                      {mergedJob?.articleContent || mergedJob?.body ? (
-                        <HtmlContent jobId={mergedJob.id} fallbackText={mergedJob?.articleContent ?? mergedJob?.body} />
-                      ) : (
-                        'No article content available.'
-                      )}
-                    </Box>
+                  <Box id="article-body" paddingTop={3} style={{ lineHeight: 1.7, paddingBottom: 24 }}>
+                    {mergedJob?.articleContent || mergedJob?.body ? (
+                      <HtmlContent jobId={mergedJob.id} fallbackText={mergedJob?.articleContent ?? mergedJob?.body} />
+                    ) : (
+                      'No article content available.'
+                    )}
                   </Box>
                 </Box>
 
@@ -288,6 +301,22 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({ jobId, onClose }
 
         <Dialog.Footer>
           <Button onClick={onClose} variant="tertiary">Close</Button>
+          {mergedJob?.status === 'failed' && (
+            <Button
+              variant="secondary"
+              loading={retryJob.isLoading}
+              onClick={async () => {
+                try {
+                  await retryJob.mutateAsync(mergedJob.id);
+                  toggleNotification({ type: 'success', message: 'Job retry started — processing will begin shortly' });
+                } catch (err: any) {
+                  toggleNotification({ type: 'danger', message: err?.message || 'Failed to retry job' });
+                }
+              }}
+            >
+              Retry Job
+            </Button>
+          )}
           {mergedJob && mergedJob.createdArticle && (() => {
             const createdId = typeof (mergedJob.createdArticle) === 'number' ? mergedJob.createdArticle : mergedJob.createdArticle?.id;
             if (!createdId) return null;

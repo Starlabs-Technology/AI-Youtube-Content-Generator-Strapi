@@ -22,8 +22,8 @@ export const PluginHeader: React.FC<Props> = ({ title, subtitle, primaryAction }
   >
     <Flex alignItems="center" justifyContent="space-between">
       {/* Left: Title & Subtitle */}
-      <Flex direction="column" gap={1}>
-        <Typography variant="alpha" fontWeight="bold">
+      <Flex direction="column" gap={1} style={{ alignItems: 'flex-start' }}>
+        <Typography variant="alpha" fontWeight="bold" style={{ fontSize: '1.75rem', lineHeight: 1.2 }}>
           {title}
         </Typography>
         {subtitle && (

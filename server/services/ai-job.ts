@@ -91,6 +91,12 @@ export default factories.createCoreService(
       }
 
       try {
+        // ── Step 0: Validate settings before starting ──
+        const cfg = await strapi.plugin('ai-youtube-article').service('settings').getSettings();
+        if (!cfg.apifyApiToken?.trim()) throw new Error('Apify API token is not configured — add it in Settings before creating jobs');
+        if (!cfg.apifyActorId?.trim()) throw new Error('Apify Actor ID is not configured — add it in Settings before creating jobs');
+        if (!cfg.geminiApiKey?.trim()) throw new Error('Gemini API key is not configured — add it in Settings before creating jobs');
+
         // ── Step 1: Mark as processing ──
         await strapi.entityService.update(
           'plugin::ai-youtube-article.ai-job',

@@ -88,23 +88,33 @@ const SettingsPage = () => {
     setIsTesting(true);
 
     try {
+      // Save settings first before testing
+      await put('/ai-youtube-article/settings', settings);
+
       const response = await post('/ai-youtube-article/test-connection');
       
-      if (response.data.success) {
-        toggleNotification({
-          type: 'success',
-          message: response.data.message || 'Connection successful',
-        });
+      const { data } = response;
+      if (data.success) {
+        const services = data.services;
+        const msg = services
+          ? `Settings saved — Apify: ${services.apify?.message || '?'} | Gemini: ${services.gemini?.message || '?'}`
+          : data.message || 'Settings saved & connection successful';
+        toggleNotification({ type: 'success', message: msg });
       } else {
         toggleNotification({
           type: 'warning',
-          message: response.data.message || 'Connection test failed',
+          message: data.message || 'Settings saved but connection test failed',
         });
       }
-    } catch (error) {
+    } catch (error: any) {
+      const msg =
+        error?.response?.data?.message ||
+        error?.response?.data?.error?.message ||
+        error?.message ||
+        'Connection test failed — check your API keys in Settings';
       toggleNotification({
         type: 'danger',
-        message: 'Failed to test connection. Please check your settings.',
+        message: msg,
       });
     } finally {
       setIsTesting(false);
@@ -127,6 +137,7 @@ const SettingsPage = () => {
       />
       
       <Layouts.Content>
+        <Box marginTop={6}>
         <Box 
           background="neutral0"
           hasRadius
@@ -309,6 +320,7 @@ const SettingsPage = () => {
               </Box>
             </form>
           </Tabs.Root>
+        </Box>
         </Box>
         <BrandingFooter />
       </Layouts.Content>
